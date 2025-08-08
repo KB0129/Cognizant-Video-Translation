@@ -14,6 +14,7 @@ This solution leverages the following AWS services:
 - **Amazon Transcribe** – Converts spoken audio from videos into accurate text.
 - **Amazon Bedrock** – Translates transcribed text using foundation models (LLMs).
 - **Amazon Polly** – Generates natural-sounding speech from translated text.
+- **VideoTranslation.json** - JSON file of Step Function Definition. 
 
 ## 🔄 Workflow
 
