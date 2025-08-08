@@ -1,0 +1,59 @@
+{
+  "Comment": "Video Translation Workflow",
+  "StartAt": "StartTranscriptionLambda",
+  "States": {
+    "StartTranscriptionLambda": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:ap-south-1:564111475034:function:StartTranscriptionLambda",
+      "Parameters": {
+        "input_video_key.$": "$.input_video_key"
+      },
+      "ResultPath": "$.StartTranscriptionResult",
+      "Next": "WaitForTranscribe"
+    },
+    "WaitForTranscribe": {
+      "Type": "Wait",
+      "Seconds": 60,
+      "Next": "TranslationSubtitlesLambda"
+    },
+    "TranslationSubtitlesLambda": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:ap-south-1:564111475034:function:TranslationSubtitlesLambda",
+      "Parameters": {
+        "transcribe_result_key.$": "$.StartTranscriptionResult.transcribe_result_key",
+        "input_video_key.$": "$.StartTranscriptionResult.input_video_key"
+      },
+      "ResultPath": "$.TranslateSubtitlesResult",
+      "Next": "WaitForSubtitle"
+    },
+    "WaitForSubtitle": {
+      "Type": "Wait",
+      "Seconds": 60,
+      "Next": "GenerateJapaneseAudioLambda"
+    },
+    "GenerateJapaneseAudioLambda": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:ap-south-1:564111475034:function:GenerateJapaneseAudioLambda",
+      "Parameters": {
+        "translated_subtitle_key.$": "$.TranslateSubtitlesResult.translated_subtitle_key",
+        "input_video_key.$": "$.TranslateSubtitlesResult.input_video_key"
+      },
+      "ResultPath": "$.GenerateJapaneseAudioResult",
+      "Next": "WaitForAudio"
+    },
+    "WaitForAudio": {
+      "Type": "Wait",
+      "Seconds": 60,
+      "Next": "ComposeFinalVideoLambda"
+    },
+    "ComposeFinalVideoLambda": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:ap-south-1:564111475034:function:ComposeFinalVideoLambda",
+      "Parameters": {
+        "input_video_key.$": "$.GenerateJapaneseAudioResult.input_video_key",
+        "merged_audio_key.$": "$.GenerateJapaneseAudioResult.merged_audio_key"
+      },
+      "End": true
+    }
+  }
+}
